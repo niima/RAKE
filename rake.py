@@ -6,6 +6,7 @@
 
 import re
 import operator
+import pprint
 
 debug = False
 test = True
@@ -32,7 +33,17 @@ def load_stop_words(stop_word_file):
                 stop_words.append(word)
     return stop_words
 
-
+def load_input_file():
+    input_file = ''
+    for line in open('input.txt'):
+        input_file+=line
+    return input_file
+"""
+def load_input_file():
+    f=open('input.txt','r', encoding='utf-8') 
+    linef=f.readlines() 
+    return linef
+"""
 def separate_words(text, min_word_return_size):
     """
     Utility function to return a list of all words that are have a length greater than a specified number of characters.
@@ -54,7 +65,7 @@ def split_sentences(text):
     Utility function to return a list of sentences.
     @param text The text that must be split in to sentences.
     """
-    sentence_delimiters = re.compile(u'[.!?,;:\t\\\\"\\(\\)\\\'\u2019\u2013]|\\s\\-\\s')
+    sentence_delimiters = re.compile('[.!?,;:\t\\\\"\\(\\)\\\'\u2019\u2013]|\\s\\-\\s')
     sentences = sentence_delimiters.split(text)
     return sentences
 
@@ -133,13 +144,13 @@ class Rake(object):
 
         keyword_candidates = generate_candidate_keyword_scores(phrase_list, word_scores)
 
-        sorted_keywords = sorted(keyword_candidates.iteritems(), key=operator.itemgetter(1), reverse=True)
+        sorted_keywords = sorted(iter(keyword_candidates.items()), key=operator.itemgetter(1), reverse=True)
         return sorted_keywords
 
 
 if test:
-    text = "Compatibility of systems of linear constraints over the set of natural numbers. Criteria of compatibility of a system of linear Diophantine equations, strict inequations, and nonstrict inequations are considered. Upper bounds for components of a minimal set of solutions and algorithms of construction of minimal generating sets of solutions for all types of systems are given. These criteria and the corresponding algorithms for constructing a minimal supporting set of solutions can be used in solving all the considered types of systems and systems of mixed types."
-
+    #text = "Compatibility of systems of linear constraints over the set of natural numbers. Criteria of compatibility of a system of linear Diophantine equations, strict inequations, and nonstrict inequations are considered. Upper bounds for components of a minimal set of solutions and algorithms of construction of minimal generating sets of solutions for all types of systems are given. These criteria and the corresponding algorithms for constructing a minimal supporting set of solutions can be used in solving all the considered types of systems and systems of mixed types."
+    text = load_input_file()
     # Split text into sentences
     sentenceList = split_sentences(text)
     #stoppath = "FoxStoplist.txt" #Fox stoplist contains "numbers", so it will not find "natural numbers" like in Table 1.1
@@ -154,15 +165,20 @@ if test:
 
     # generate candidate keyword scores
     keywordcandidates = generate_candidate_keyword_scores(phraseList, wordscores)
-    if debug: print keywordcandidates
+    if debug: print(keywordcandidates)
 
-    sortedKeywords = sorted(keywordcandidates.iteritems(), key=operator.itemgetter(1), reverse=True)
-    if debug: print sortedKeywords
+    sortedKeywords = sorted(iter(keywordcandidates.items()), key=operator.itemgetter(1), reverse=True)
+    if debug: print(sortedKeywords)
 
     totalKeywords = len(sortedKeywords)
-    if debug: print totalKeywords
-    print sortedKeywords[0:(totalKeywords / 3)]
+    if debug: print(totalKeywords)
+
+    pp = pprint.PrettyPrinter(indent=4)
+
+    pp.pprint(sortedKeywords[0:int((totalKeywords / 3))])
 
     rake = Rake("SmartStoplist.txt")
     keywords = rake.run(text)
-    print keywords
+
+    pp.pprint(keywords)
+    
